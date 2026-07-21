@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Árbol Genealógico Familia Aparicio Petit</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d8e3e0">
+    <link rel="apple-touch-icon" href="icono_arbol.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sansita:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        @font-face {
+            font-family: 'Seagram';
+            src: url('Seagram tfb.ttf') format('truetype'); 
+            font-weight: normal; font-style: normal;
+        }
+        @font-face {
+            font-family: 'Kaiserzeit';
+            src: url('KAISG__.TTF') format('truetype'); 
+            font-weight: normal; font-style: normal;
+        }
+
+        html, body {
+            font-family: Arial, sans-serif; margin: 0; padding: 0;
+            width: 100vw; height: 100vh; background-color: #d8e3e0; overflow: hidden; 
+        }
+
+        #viewport {
+            width: 100%; height: 100%; overflow: auto; 
+            -webkit-overflow-scrolling: touch; position: relative; scroll-behavior: smooth;
+        }
+
+        .lienzo-arbol {
+            min-width: max(100%, 1200px); width: max-content; min-height: max(100%, 2000px); 
+            background-image: url('fondo_arbol_alto.webp'); background-position: center bottom; 
+            background-repeat: no-repeat; background-size: 100% auto; 
+            display: flex; flex-direction: column; justify-content: flex-end; 
+            padding-bottom: 280px; padding-top: 500px; 
+        }
+
+        .title-container {
+            position: fixed; top: 15px; left: 0; width: 100%; text-align: center;
+            z-index: 2000; pointer-events: none; 
+        }
+
+        .fixed-title {
+            display: inline-block; background-image: url('marco_titulo.webp'); 
+            background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+            padding: 25px 90px 30px 90px; filter: drop-shadow(0 8px 15px rgba(0,0,0,0.6));
+            pointer-events: auto; max-width: 90%; box-sizing: border-box;
+        }
+
+        .fixed-title h1 {
+            margin: 0; font-size: 42px; 
+            color: #3b2110; letter-spacing: 1px; font-weight: normal; 
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.4); 
+        }
+
+        .fs-btn {
+            position: fixed; bottom: 20px; left: 20px; z-index: 1000; padding: 10px 15px; font-weight: bold;
+            background-color: #5a4634; color: white; border: 2px solid #8c6b4a; border-radius: 8px; cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: background-color 0.3s;
+        }
+        .fs-btn:hover { background-color: #8c6b4a; }
+
+        .music-player-btn {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 12px 18px; font-weight: bold;
+            background-color: #8c6b4a; color: white; border: 2px solid #5a4634; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: background-color 0.3s;
+        }
+        .music-player-btn:hover { background-color: #5a4634; }
+        
+        .events-btn {
+            position: fixed; bottom: 70px; right: 20px; z-index: 1000; padding: 12px 18px; font-weight: bold;
+            background-color: #2e86c1; color: white; border: 2px solid #1b4f72; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: background-color 0.3s;
+        }
+        .events-btn:hover { background-color: #1b4f72; }
+
+        .voice-btn {
+            margin-top: 15px; padding: 10px 15px; font-size: 14px; font-weight: bold;
+            background-color: #5a4634; color: white; border: 2px solid #8c6b4a; border-radius: 8px;
+            cursor: pointer; width: 100%; transition: background-color 0.3s; display: none; 
+        }
+        .voice-btn:hover { background-color: #8c6b4a; }
+
+        .tree { display: inline-block; white-space: nowrap; padding-bottom: 20px; text-align: center; width: 100%; }
+        .tree ul { padding-top: 0; padding-bottom: 60px; position: relative; display: flex; justify-content: center; padding-left: 0; align-items: flex-end; }
+        .tree li ul { display: none; }
+        .tree li { text-align: center; list-style-type: none; position: relative; padding: 0 5px 60px 5px; display: flex; flex-direction: column-reverse; align-items: center; }
+        .tree li::before, .tree li::after { content: ''; position: absolute; bottom: 0; right: 50%; border-bottom: 3px solid #3a2b1c; width: 50%; height: 60px; }
+        .tree li::after { right: auto; left: 50%; border-left: 3px solid #3a2b1c; }
+        .tree li:only-child::after, .tree li:only-child::before { display: none; }
+        .tree li:only-child { padding-bottom: 0; }
+        .tree li:first-child::before, .tree li:last-child::after { border: 0 none; }
+        .tree li:last-child::before { border-right: 3px solid #3a2b1c; border-radius: 0 0 5px 0; }
+        .tree li:first-child::after { border-radius: 0 0 0 5px; }
+        .tree ul ul::before { content: ''; position: absolute; bottom: 0; left: 50%; border-left: 3px solid #3a2b1c; width: 0; height: 60px; }
+
+        .person-patriarca, .person {
+            border: none; background-color: transparent; background-image: url('marco_madera.webp'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+            color: #222; border-radius: 12px; cursor: pointer; margin: 0 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; white-space: normal; transition: transform 0.3s, box-shadow 0.3s; scroll-margin-top: 200px; 
+        }
+        .person-patriarca { padding: 30px 25px 25px 25px; min-width: 140px; min-height: 170px; }
+        .person { padding: 25px 20px 20px 20px; min-width: 110px; min-height: 140px; margin: 0 6px; }
+        
+        .person-patriarca:hover, .person:hover, .person-small:hover { transform: scale(1.1); filter: brightness(1.1); z-index: 2; }
+        
+        .person-patriarca img { width: 95px; height: 95px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 3px solid #e8dcc7; background-color: #ffffff; box-shadow: 0 5px 8px rgba(0,0,0,0.5); }
+        .person img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid #e8dcc7; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.4); }
+        
+        .person-patriarca h3, .person h3 { margin: 0; font-weight: bold; background-color: #e8dcc7; border-radius: 6px; border: 1px solid #8c6b4a; box-shadow: 0 2px 4px rgba(0,0,0,0.3); color: #3a2b1c; }
+        .person-patriarca h3 { font-size: 14px; padding: 5px 12px; }
+        .person h3 { font-size: 12px; padding: 4px 10px; }
+
+        .person-small {
+            border: none; background-color: transparent; background-image: url('marco_chico.webp'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+            padding: 20px 25px; color: #3a2b1c; cursor: pointer; min-width: 130px; min-height: 40px; margin: 0 6px; display: flex; align-items: center; justify-content: center; white-space: normal; transition: transform 0.3s, box-shadow 0.3s; scroll-margin-top: 200px;
+        }
+        .person-small h3 { margin: 0; font-size: 12px; font-weight: bold; background: none; border: none; box-shadow: none; }
+
+        .toggle-btn { margin: 10px 0; padding: 6px 12px; font-size: 11px; font-weight: bold; background-color: #2e86c1; color: white; border: 1px solid #1b4f72; border-radius: 6px; cursor: pointer; z-index: 5; box-shadow: 0 3px 5px rgba(0,0,0,0.3); transition: background-color 0.3s; }
+        .toggle-btn:hover { background-color: #1b4f72; }
+
+        .btn-conyuge { background-color: #8e44ad; border-color: #5b2c6f; margin-top: 10px; width: 100%; }
+        .btn-conyuge:hover { background-color: #5b2c6f; }
+
+        /* MODALES */
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
+        .modal-content {
+            background-color: #fdf5e6; margin: 5% auto; padding: 25px; border-radius: 12px; width: 340px; max-width: 85%; text-align: left; white-space: normal; border: 4px solid #8c6b4a; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            background-image: radial-gradient(#fff 20%, transparent 20%), radial-gradient(#fff 20%, transparent 20%); background-position: 0 0, 5px 5px; background-size: 10px 10px; max-height: 85vh; overflow-y: auto; 
+        }
+        
+        .modal-img { 
+            width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid #8c6b4a; 
+            margin-bottom: 5px; box-shadow: 0 4px 8px rgba(0,0,0,0.4); display: none; margin-left: auto; margin-right: auto; 
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .modal-img:hover { transform: scale(1.05); }
+
+        .click-hint-text { font-size: 11px; color: #5a4634; margin-bottom: 10px; cursor: pointer; display: none; font-style: italic; text-align:center;}
+        .click-hint-text:hover { color: #8c6b4a; }
+
+        .modal-name { margin-top: 0; color: #5a4634; border-bottom: 2px solid #8c6b4a; padding-bottom: 10px; text-align: center; }
+
+        .close-btn { color: #5a4634; float: right; font-size: 32px; font-weight: bold; cursor: pointer; margin-top: -10px; }
+        .close-btn:hover { color: red; }
+        .back-btn { font-size: 14px; font-weight: bold; float: left; margin-top: -5px; padding: 5px 10px; border-radius: 5px; background: #e8dcc7; border: 1px solid #8c6b4a; color: #3a2b1c; cursor: pointer; }
+        .back-btn:hover { background: #8c6b4a; color: white; }
+        .modal-details p { margin: 8px 0; font-size: 14px; color: #333;}
+        
+        .event-list { list-style-type: none; padding: 0; margin-top: 15px;}
+        .event-item { background: #fff; border: 1px solid #8c6b4a; border-radius: 8px; padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, background-color 0.2s;}
+        .event-item:hover { transform: translateY(-2px); background-color: #f0f8ff; }
+        .event-item h4 { margin: 0 0 5px 0; color: #3a2b1c; font-size: 14px;}
+        .event-item p { margin: 0; font-size: 12px; color: #555;}
+        .event-birthday { border-left: 5px solid #28b463; }
+        .event-death { border-left: 5px solid #5b2c6f; }
+        .event-selector { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #8c6b4a; font-family: inherit; font-size: 14px; background-color: white;}
+
+        .fullscreen-viewer {
+            display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0,0,0,0.95); justify-content: center; align-items: center; cursor: zoom-out;
+        }
+        .fullscreen-viewer img { max-width: 95vw; max-height: 95vh; border-radius: 8px; box-shadow: 0 0 20px rgba(255,255,255,0.2); object-fit: contain; }
+        .close-viewer { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
+
+        @media screen and (max-width: 768px), screen and (max-height: 600px) {
+            .fixed-title { padding: 15px 40px 20px 40px; top: 10px; }
+            .fixed-title h1 { font-size: 24px; } 
+            .person-patriarca { min-width: 100px; min-height: 130px; padding: 20px 15px 10px 15px; margin: 0 5px; }
+            .person-patriarca img { width: 60px; height: 60px; margin-bottom: 5px; }
+            .person-patriarca h3 { font-size: 11px; padding: 2px 6px; }
+            .person { min-width: 80px; min-height: 100px; padding: 15px 10px 10px 10px; margin: 0 3px; }
+            .person img { width: 45px; height: 45px; }
+            .person h3 { font-size: 10px; padding: 2px 4px; }
+            .person-small { min-width: 90px; min-height: 30px; padding: 8px 10px; margin: 0 3px; }
+            .person-small h3 { font-size: 9px; }
+            .tree li { padding: 0 2px 40px 2px; }
+            .tree li::before, .tree li::after { height: 40px; }
+            .tree ul ul::before { height: 40px; }
+            .tree ul { padding-bottom: 40px; }
+            .fs-btn, .music-player-btn { padding: 6px 10px; font-size: 11px; }
+            .events-btn { padding: 6px 10px; font-size: 11px; bottom: 60px;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="title-container">
+        <div class="fixed-title">
+            <h1>
+                <span style="font-family: 'Seagram', serif; font-size: 0.85em;">Árbol Genealógico: </span>
+                <span style="font-family: 'Kaiserzeit', serif; font-size: 1.15em;">Flia. Aparicio Petit</span>
+            </h1>
+        </div>
+    </div>
+
+    <button id="fs-btn" class="fs-btn" onclick="toggleFullScreen()">⛶ Pantalla Completa</button>
+    <button id="music-btn" class="music-player-btn" onclick="toggleMusic()">🎵 Reproducir Música</button>
+    <button id="events-btn" class="events-btn" onclick="openEventsPanel()">📅 Eventos de la Semana</button>
+    
+    <audio id="bg-music" loop><source src="musica_fondo.mp3" type="audio/mpeg"></audio>
+    <audio id="voice-player"></audio>
+
+    <!-- ESTADOS DE CARGA -->
+    <div id="loading-message" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(255,255,255,0.9); padding:20px; border-radius:10px; border:2px solid #8c6b4a; z-index:5000; text-align:center; font-weight:bold; color:#3b2110;">
+        Cargando datos familiares desde Google Sheets...
+    </div>
+
+    <div id="viewport">
+        <div class="lienzo-arbol">
+            <div class="tree">
+                <ul style="display: flex;"> 
+                    <li>
+                        <div id="raiz-arbol" style="display: flex; gap: 15px; justify-content: center;">
+                            <div class="person-patriarca" data-name="Pedro Ramón Aparicio Rodríguez">
+                                <img src="papabuelo.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                <h3>Pedro Ramón</h3>
+                            </div>
+                            <div class="person-patriarca" data-name="Ana María Petit de Aparicio">
+                                <img src="mamabuela.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                <h3>Ana María Petit</h3>
+                            </div>
+                        </div>
+                        
+                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Ver 1° Generación</button>
+
+                        <ul style="display: none;">
+                            <li>
+                                <div class="person" data-name="Ana Teresa Aparicio Petit">
+                                    <img src="ana_teresa.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Ana Teresa</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li>
+                                        <div class="person-small" data-name="Sandra Elizabeth López Aparicio"><h3>Sandra Elizabeth</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Matías de Jesús Finol López"><h3>Matías de Jesús</h3></div></li>
+                                            <li><div class="person-small" data-name="Zoé Isabella Finol López"><h3>Zoé Isabella</h3></div></li>
+                                        </ul>
+                                    </li>
+                                    <li><div class="person-small" data-name="Jessica Josefina López Aparicio"><h3>Jessica Josefina</h3></div></li>
+                                    <li><div class="person-small" data-name="Joan Manuel López Aparicio"><h3>Joan Manuel</h3></div></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Pedro Jesús Aparicio Petit">
+                                    <img src="pedro_jesus.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Pedro Jesús</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li>
+                                        <div class="person-small" data-name="Emerson Alexander Aparicio La Grave"><h3>Emerson Alexander</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Alexander Gregorio Aparicio Álvarez"><h3>Alexander Gregorio</h3></div></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="person-small" data-name="Pedro Jesús Aparicio La Grave"><h3>Pedro Jesús Jr.</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Coromoto del Valle Aparicio Marin"><h3>Coromoto</h3></div></li>
+                                            <li><div class="person-small" data-name="Osiris Margarita Aparicio Marin"><h3>Osiris</h3></div></li>
+                                        </ul>
+                                    </li>
+                                    <li><div class="person-small" data-name="Jesús Alexander Aparicio La Grave"><h3>Jesús Alexander</h3></div></li>
+                                    <li><div class="person-small" data-name="Sorangel Alejandra Aparicio La Grave"><h3>Sorangel Alejandra</h3></div></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Alba Marina Aparicio Petit">
+                                    <img src="alba_marina.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Alba Marina</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li><div class="person-small" data-name="Karl Alexander Díaz Aparicio"><h3>Karl Alexander</h3></div></li>
+                                    <li><div class="person-small" data-name="Vanessa Carolina Díaz Aparicio"><h3>Vanessa Carolina</h3></div></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Oscar David Aparicio Petit">
+                                    <img src="oscar_david.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Oscar David</h3>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Lilian María Aparicio Petit">
+                                    <img src="lilian_maria.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Lilian María</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li><div class="person-small" data-name="Mario José Barrios Aparicio"><h3>Mario José</h3></div></li>
+                                    <li>
+                                        <div class="person-small" data-name="Liliana Leonor Barrios Aparicio"><h3>Liliana Leonor</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Marcos Leonardo Colmenares Barrios"><h3>Marcos Leonardo</h3></div></li>
+                                            <li><div class="person-small" data-name="Rafael Alejandro Colmenares Barrios"><h3>Rafael Alejandro</h3></div></li>
+                                        </ul>
+                                    </li>
+                                    <li><div class="person-small" data-name="Marilin Belén Barrios Aparicio"><h3>Marilin Belén</h3></div></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Roger Saúl Aparicio Petit">
+                                    <img src="roger_saul.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Roger Saúl</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li>
+                                        <div class="person-small" data-name="Roger Saúl Aparicio Grau"><h3>Roger Saúl Jr.</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Saúl Scott Aparicio Alvis"><h3>Saúl Scott</h3></div></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="person-small" data-name="Lia Norevely Aparicio Grau"><h3>Lía Norevely</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Samantha Isabella Albornoz Aparicio"><h3>Samantha Isabella</h3></div></li>
+                                        </ul>
+                                    </li>
+                                    <li><div class="person-small" data-name="Roger Samuel Aparicio Grau"><h3>Roger Samuel</h3></div></li>
+                                    <li><div class="person-small" data-name="Lina Norvely Aparicio Grau"><h3>Lina Norvely</h3></div></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Ruth Ismenia Aparicio Petit">
+                                    <img src="ruth_ismenia.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Ruth Ismenia</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li><div class="person-small" data-name="Rubén Enrique Cordobés Aparicio"><h3>Rubén Enrique</h3></div></li>
+                                    <li>
+                                        <div class="person-small" data-name="Miguel Ángel Cordobés Aparicio"><h3>Miguel Ángel</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Alice Gisselle Cordobés Pulido"><h3>Alice Gisselle</h3></div></li>
+                                            <li><div class="person-small" data-name="Liam Carter Cordobés Pulido"><h3>Liam Carter</h3></div></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Ricardo Andrés Aparicio Petit">
+                                    <img src="ricardo.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Ricardo Andrés</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li><div class="person-small" data-name="Ricardo Andrés Aparicio Passarella"><h3>Ricardo Andrés Jr.</h3></div></li>
+                                    <li>
+                                        <div class="person-small" data-name="Andrés Alexander Aparicio Coronado"><h3>Andrés Alexander</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Derek Alexander Aparicio Varela"><h3>Derek Alexander</h3></div></li>
+                                            <li><div class="person-small" data-name="Thiago Andrés Aparicio Varela"><h3>Thiago Andrés</h3></div></li>
+                                        </ul>
+                                    </li>
+                                    <li><div class="person-small" data-name="Ana Andrea Aparicio Coronado"><h3>Ana Andrea</h3></div></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Dulce María Aparicio Petit">
+                                    <img src="dulce.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Dulce María</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li><div class="person-small" data-name="Ariadni Cristina González Aparicio"><h3>Ariadni Cristina</h3></div></li>
+                                    <li><div class="person-small" data-name="Oriana Gabriela González Aparicio"><h3>Oriana Gabriela</h3></div></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Alfredo Ramón Aparicio Petit">
+                                    <img src="alfredo_ramon.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Alfredo Ramón</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li>
+                                        <div class="person-small" data-name="Hans Christian Aparicio Moreno"><h3>Hans Christian</h3></div>
+                                        <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                        <ul style="display: none;">
+                                            <li><div class="person-small" data-name="Dermond Aparicio Rodríguez"><h3>Dermond</h3></div></li>
+                                        </ul>
+                                    </li>
+                                    <li><div class="person-small" data-name="Alfredo Alejandro Aparicio Moreno"><h3>Alfredo Alejandro</h3></div></li>
+                                    <li><div class="person-small" data-name="David Alejandro Aparicio Piña"><h3>David Alejandro</h3></div></li>
+                                    <li><div class="person-small" data-name="Alfredo José Aparicio Piña"><h3>Alfredo José</h3></div></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <div class="person" data-name="Celeste Angélica Aparicio Petit">
+                                    <img src="celeste_angelica.webp" onerror="this.src='https://via.placeholder.com/75?text=Foto'">
+                                    <h3>Celeste Angélica</h3>
+                                </div>
+                                <button class="toggle-btn" onclick="toggleChildren(this)">+ Descendientes</button>
+                                <ul style="display: none;">
+                                    <li><div class="person-small" data-name="Ángel Eduardo Carrero Aparicio"><h3>Ángel Eduardo</h3></div></li>
+                                    <li><div class="person-small" data-name="Angely Eileen Carrero Aparicio"><h3>Angely Eileen</h3></div></li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES Y PANELES -->
+    <div id="eventsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('eventsModal')">&times;</span>
+            <h2 class="modal-name" style="font-size: 18px;">Efemérides de la Semana</h2>
+            
+            <p style="font-size:12px; margin-bottom:5px; color:#5a4634; text-align:center;">Selecciona una fecha para ver su semana:</p>
+            <input type="date" id="weekSelector" class="event-selector" onchange="filterEventsByWeek()">
+            <p id="weekRangeText" style="text-align:center; font-size:13px; font-weight:bold; color:#2e86c1; margin-top:-5px; margin-bottom:10px;"></p>
+
+            <ul id="eventsList" class="event-list"></ul>
+        </div>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('infoModal')">&times;</span>
+            <div style="text-align: center;">
+                <img id="modal-img" class="modal-img" src="" alt="Fotografía" onclick="openFullscreen('modal-img')" title="Toca para ampliar">
+                <div id="click-hint" class="click-hint-text" onclick="openFullscreen('modal-img')">🔍 Toca para ampliar</div>
+            </div>
+            <h2 id="modal-name" class="modal-name">Nombre</h2>
+            
+            <div class="modal-details">
+                <p><strong>Nacimiento:</strong> <span id="modal-birth"></span></p>
+                <p><strong>Defunción:</strong> <span id="modal-death"></span></p>
+                <p><strong>Pareja:</strong> <span id="modal-marriage"></span></p>
+                <p><strong>Hijos:</strong> <span id="modal-children"></span></p>
+            </div>
+            
+            <div id="spouse-buttons-container"></div>
+            <button id="play-voice-btn" class="voice-btn" onclick="toggleVoice('voice-player', 'play-voice-btn')">🔊 Escuchar Mensaje</button>
+        </div>
+    </div>
+
+    <div id="spouseModal" class="modal">
+        <div class="modal-content">
+            <button class="back-btn" onclick="closeSpouseModal()">⬅ Volver</button>
+            <span class="close-btn" onclick="closeModal('spouseModal')" style="margin-top:-10px;">&times;</span>
+            <div style="clear: both; margin-bottom: 10px;"></div>
+            
+            <div style="text-align: center;">
+                <img id="spouse-img" class="modal-img" src="" alt="Fotografía" onclick="openFullscreen('spouse-img')" title="Toca para ampliar">
+                <div id="spouse-click-hint" class="click-hint-text" onclick="openFullscreen('spouse-img')">🔍 Toca para ampliar</div>
+            </div>
+            <h2 id="spouse-name" class="modal-name">Nombre del Cónyuge</h2>
+            
+            <div class="modal-details">
+                <p><strong>Nacimiento:</strong> <span id="spouse-birth"></span></p>
+                <p><strong>Defunción:</strong> <span id="spouse-death"></span></p>
+            </div>
+            
+            <button id="play-spouse-voice-btn" class="voice-btn" onclick="toggleVoice('voice-player', 'play-spouse-voice-btn')">🔊 Escuchar Mensaje</button>
+        </div>
+    </div>
+
+    <div id="fullscreen-viewer" class="fullscreen-viewer" onclick="closeFullscreen()">
+        <span class="close-viewer">&times;</span>
+        <img id="fullscreen-img" src="" alt="Foto ampliada">
+    </div>
+
+    <script>
+        // =========================================================
+        // 1. INSERTA TU ENLACE DE GOOGLE SHEETS AQUÍ
+        // =========================================================
+        const urlGoogleSheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-Sjt5auJGr4RmdMUEERPkj-Hw2QPCFJyo1DvqqQbNbI-zkWF4S8c6l1JvCehW-yS8Xk3YVvg1DcVy/pub?output=tsv"; 
+
+        // Variables de la Base de Datos
+        let db = {};
+        let conyugesDB = {};
+        let currentMainAudio = ""; 
+
+        // Inicializador al cargar la página
+        window.onload = async function() {
+            setTimeout(() => {
+                const raiz = document.getElementById("raiz-arbol");
+                if(raiz) raiz.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' });
+            }, 100); 
+            
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('weekSelector').value = `${yyyy}-${mm}-${dd}`;
+
+            await cargarBaseDeDatos();
+        };
+
+        // =========================================================
+        // 2. CONEXIÓN Y PROCESAMIENTO CON GOOGLE SHEETS
+        // =========================================================
+        async function cargarBaseDeDatos() {
+            if(urlGoogleSheet === "AQUI_PEGA_TU_LINK_TSV_DE_GOOGLE") {
+                document.getElementById('loading-message').innerText = "⚠️ Error: Falta el enlace de Google Sheets en el código.";
+                return;
+            }
+
+            try {
+                const respuesta = await fetch(urlGoogleSheet);
+                const textoTSV = await respuesta.text();
+                procesarTSV(textoTSV);
+                vincularDatosAlArbol();
+                document.getElementById('loading-message').style.display = 'none'; // Ocultar mensaje de carga
+            } catch (error) {
+                console.error("Error al cargar Google Sheets:", error);
+                document.getElementById('loading-message').innerText = "❌ Error al conectar con Google Sheets. Revisa el enlace.";
+            }
+        }
+
+        function procesarTSV(tsv) {
+            const lineas = tsv.split('\n');
+            for(let i = 1; i < lineas.length; i++) {
+                if(!lineas[i].trim()) continue;
+                const columnas = lineas[i].split('\t');
+                
+                const nombre = columnas[0] ? columnas[0].trim() : "";
+                const nacimiento = columnas[1] ? columnas[1].trim() : "-";
+                const defuncion = columnas[2] ? columnas[2].trim() : "-";
+                const pareja = columnas[3] ? columnas[3].trim() : "-";
+                const hijos = columnas[4] ? columnas[4].trim() : "0";
+                const audio = columnas[5] ? columnas[5].trim() : "";
+                const imagen = columnas[6] ? columnas[6].trim() : "";
+                const conyugeDe = columnas[7] ? columnas[7].trim() : "";
+
+                if (conyugeDe === "") {
+                    // Es un familiar principal (Titular)
+                    db[nombre] = { nombre, nacimiento, defuncion, pareja, hijos, audio, imagen };
+                } else {
+                    // Es un cónyuge
+                    if(!conyugesDB[conyugeDe]) conyugesDB[conyugeDe] = [];
+                    conyugesDB[conyugeDe].push({ nombre, nacimiento, defuncion, audio, imagen });
+                }
+            }
+        }
+
+        function vincularDatosAlArbol() {
+            // Busca todos los cuadros del árbol y les asigna su información
+            document.querySelectorAll('.person-patriarca, .person, .person-small').forEach(divPersona => {
+                const nombreDiv = divPersona.getAttribute('data-name');
+                const personaDatos = db[nombreDiv];
+
+                if(personaDatos) {
+                    // Asignar el click automáticamente
+                    divPersona.onclick = () => openModal(personaDatos);
+                    
+                    // Asegurar que la imagen del HTML también se actualice si en el Excel dice algo distinto
+                    const img = divPersona.querySelector('img');
+                    if(img && personaDatos.imagen) {
+                        img.src = personaDatos.imagen;
+                    }
+                }
+            });
+        }
+
+        // =========================================================
+        // 3. LÓGICA DE INTERFAZ (MODALES Y EVENTOS)
+        // =========================================================
+        function openModal(persona) {
+            document.getElementById('modal-name').innerText = persona.nombre;
+            document.getElementById('modal-birth').innerText = persona.nacimiento;
+            document.getElementById('modal-death').innerText = persona.defuncion;
+            document.getElementById('modal-marriage').innerText = persona.pareja;
+            document.getElementById('modal-children').innerText = persona.hijos;
+            
+            var modalImg = document.getElementById("modal-img");
+            var clickHint = document.getElementById("click-hint");
+            
+            if (persona.imagen && persona.imagen !== '') { 
+                modalImg.src = persona.imagen; 
+                modalImg.style.display = "block"; 
+                clickHint.style.display = "block"; 
+            } else { 
+                modalImg.style.display = "none"; 
+                clickHint.style.display = "none"; 
+            }
+
+            const spouseContainer = document.getElementById('spouse-buttons-container');
+            spouseContainer.innerHTML = ""; 
+            
+            if (conyugesDB[persona.nombre]) {
+                conyugesDB[persona.nombre].forEach(conyuge => {
+                    let btn = document.createElement("button");
+                    btn.className = "toggle-btn btn-conyuge";
+                    btn.innerText = "💍 Ver cónyuge: " + conyuge.nombre;
+                    btn.onclick = function() { openSpouseModal(conyuge); };
+                    spouseContainer.appendChild(btn);
+                });
+            }
+
+            setupAudio('play-voice-btn', persona.audio);
+            currentMainAudio = persona.audio; 
+            document.getElementById('infoModal').style.display = "block";
+        }
+
+        function openSpouseModal(conyuge) {
+            document.getElementById('infoModal').style.display = "none"; 
+            document.getElementById('spouse-name').innerText = conyuge.nombre;
+            document.getElementById('spouse-birth').innerText = conyuge.nacimiento;
+            document.getElementById('spouse-death').innerText = conyuge.defuncion;
+
+            var spouseImg = document.getElementById("spouse-img");
+            var spouseHint = document.getElementById("spouse-click-hint");
+
+            if (conyuge.imagen && conyuge.imagen !== '') { 
+                spouseImg.src = conyuge.imagen; 
+                spouseImg.style.display = "block"; 
+                spouseHint.style.display = "block";
+            } else { 
+                spouseImg.style.display = "none"; 
+                spouseHint.style.display = "none";
+            }
+
+            setupAudio('play-spouse-voice-btn', conyuge.audio);
+            document.getElementById('spouseModal').style.display = "block"; 
+        }
+
+        function openEventsPanel() {
+            document.getElementById('eventsModal').style.display = "block";
+            filterEventsByWeek();
+        }
+
+        function filterEventsByWeek() {
+            const dateInput = document.getElementById('weekSelector').value;
+            const selectedDate = dateInput ? new Date(dateInput + "T12:00:00") : new Date();
+            const dayOfWeek = selectedDate.getDay(); 
+            const diffToMonday = selectedDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            
+            const startOfWeek = new Date(selectedDate.setDate(diffToMonday));
+            startOfWeek.setHours(0,0,0,0);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23,59,59,999);
+
+            const options = { day: 'numeric', month: 'long' };
+            document.getElementById('weekRangeText').innerText = 
+                `Del Lunes ${startOfWeek.toLocaleDateString('es-ES', options)} \nal Domingo ${endOfWeek.toLocaleDateString('es-ES', options)}`;
+
+            const eventsList = document.getElementById('eventsList');
+            eventsList.innerHTML = ''; 
+            let eventsFound = [];
+
+            function isDateInWeek(day, monthIndex) {
+                let testDate1 = new Date(startOfWeek.getFullYear(), monthIndex, day);
+                let testDate2 = new Date(endOfWeek.getFullYear(), monthIndex, day);
+                return (testDate1 >= startOfWeek && testDate1 <= endOfWeek) || 
+                       (testDate2 >= startOfWeek && testDate2 <= endOfWeek);
+            }
+
+            // Revisar Titulares en base de datos
+            Object.values(db).forEach(persona => {
+                if (persona.nacimiento && persona.nacimiento !== '-') {
+                    const parts = persona.nacimiento.split('/');
+                    if (parts.length === 3 && isDateInWeek(parseInt(parts[0]), parseInt(parts[1]) - 1)) {
+                        eventsFound.push({ type: 'birthday', name: persona.nombre, mainName: persona.nombre, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]) });
+                    }
+                }
+                if (persona.defuncion && persona.defuncion !== '-') {
+                    const parts = persona.defuncion.split('/');
+                    if (parts.length === 3 && isDateInWeek(parseInt(parts[0]), parseInt(parts[1]) - 1)) {
+                        eventsFound.push({ type: 'death', name: persona.nombre, mainName: persona.nombre, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]) });
+                    }
+                }
+            });
+
+            // Revisar Cónyuges en base de datos
+            for (const keyTitular in conyugesDB) {
+                conyugesDB[keyTitular].forEach(conyuge => {
+                    if (conyuge.nacimiento && conyuge.nacimiento !== '-') {
+                        const parts = conyuge.nacimiento.split('/');
+                        if (parts.length === 3 && isDateInWeek(parseInt(parts[0]), parseInt(parts[1]) - 1)) {
+                            eventsFound.push({ type: 'birthday', name: conyuge.nombre + " (Cónyuge)", mainName: keyTitular, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]) });
+                        }
+                    }
+                    if (conyuge.defuncion && conyuge.defuncion !== '-') {
+                        const parts = conyuge.defuncion.split('/');
+                        if (parts.length === 3 && isDateInWeek(parseInt(parts[0]), parseInt(parts[1]) - 1)) {
+                            eventsFound.push({ type: 'death', name: conyuge.nombre + " (Cónyuge)", mainName: keyTitular, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]) });
+                        }
+                    }
+                });
+            }
+
+            eventsFound.sort((a, b) => a.day - b.day);
+
+            if (eventsFound.length === 0) {
+                eventsList.innerHTML = '<li class="event-item" style="cursor:default;"><p style="text-align:center;">No hay eventos registrados en esta semana.</p></li>';
+            } else {
+                const currentYear = startOfWeek.getFullYear();
+                const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                
+                eventsFound.forEach(ev => {
+                    const li = document.createElement('li');
+                    li.className = ev.type === 'birthday' ? 'event-item event-birthday' : 'event-item event-death';
+                    li.onclick = () => scrollToPerson(ev.mainName);
+                    
+                    let desc = "";
+                    if (ev.type === 'birthday') {
+                        let age = currentYear - ev.year;
+                        desc = `🎂 <strong>${ev.day} de ${mesesNombres[ev.month]}</strong><br>Cumpleaños (${age} años)`;
+                    } else {
+                        let yearsAgo = currentYear - ev.year;
+                        desc = `🕊️ <strong>${ev.day} de ${mesesNombres[ev.month]}</strong><br>Aniversario de defunción (${yearsAgo} años)`;
+                    }
+
+                    li.innerHTML = `<h4>${ev.name}</h4><p>${desc}</p><div style="font-size:10px; color:#2e86c1; margin-top:6px; font-weight:bold;">📍 Tocar para ubicar en el árbol</div>`;
+                    eventsList.appendChild(li);
+                });
+            }
+        }
+
+        // =========================================================
+        // FUNCIONES DE CONTROL Y AUDIO (Sin Cambios)
+        // =========================================================
+        function scrollToPerson(name) {
+            closeModal('eventsModal'); 
+            const personDiv = document.querySelector(`[data-name="${name}"]`);
+            if (!personDiv) return;
+
+            let currentElement = personDiv;
+            while (currentElement && currentElement.id !== 'viewport') {
+                if (currentElement.tagName === 'UL' && (currentElement.style.display === 'none' || window.getComputedStyle(currentElement).display === 'none')) {
+                    currentElement.style.display = 'flex';
+                    const prevBtn = currentElement.previousElementSibling;
+                    if (prevBtn && prevBtn.tagName === 'BUTTON' && prevBtn.classList.contains('toggle-btn')) {
+                        prevBtn.innerText = '- Ocultar';
+                    }
+                }
+                currentElement = currentElement.parentElement;
+            }
+
+            setTimeout(() => {
+                personDiv.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                const originalBg = personDiv.style.backgroundColor;
+                const originalBoxShadow = personDiv.style.boxShadow;
+                personDiv.style.transition = 'all 0.5s ease';
+                personDiv.style.transform = 'scale(1.15)';
+                personDiv.style.boxShadow = '0 0 25px 5px #2e86c1';
+                personDiv.style.backgroundColor = '#fdf5e6';
+                setTimeout(() => {
+                    personDiv.style.transform = ''; personDiv.style.boxShadow = originalBoxShadow; personDiv.style.backgroundColor = originalBg;
+                }, 2500); 
+            }, 300); 
+        }
+
+        function toggleFullScreen() {
+            var btn = document.getElementById("fs-btn");
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); btn.innerText = "⛶ Salir Pantalla Completa"; } 
+            else { document.exitFullscreen(); btn.innerText = "⛶ Pantalla Completa"; }
+        }
+
+        function toggleMusic() {
+            var music = document.getElementById("bg-music");
+            var btn = document.getElementById("music-btn");
+            if (music.paused) { music.play(); btn.innerText = "🔇 Pausar Música"; btn.style.backgroundColor = "#5a4634"; } 
+            else { music.pause(); btn.innerText = "🎵 Reproducir Música"; btn.style.backgroundColor = "#8c6b4a"; }
+        }
+
+        function closeSpouseModal() {
+            document.getElementById('spouseModal').style.display = "none";
+            setupAudio('play-voice-btn', currentMainAudio); 
+            document.getElementById('infoModal').style.display = "block";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+            var voicePlayer = document.getElementById("voice-player");
+            if(voicePlayer) { voicePlayer.pause(); voicePlayer.currentTime = 0; }
+            document.getElementById("bg-music").volume = 1.0; 
+        }
+
+        function openFullscreen(imgId) {
+            var img = document.getElementById(imgId);
+            if (img.src && img.src !== "") {
+                document.getElementById("fullscreen-img").src = img.src; document.getElementById("fullscreen-viewer").style.display = "flex";
+            }
+        }
+
+        function closeFullscreen() {
+            document.getElementById("fullscreen-viewer").style.display = "none"; document.getElementById("fullscreen-img").src = "";
+        }
+
+        function setupAudio(btnId, src) {
+            var voicePlayer = document.getElementById("voice-player");
+            var btnVoice = document.getElementById(btnId);
+            voicePlayer.pause(); voicePlayer.currentTime = 0;
+            
+            document.getElementById('play-voice-btn').innerText = "🔊 Escuchar Mensaje";
+            document.getElementById('play-voice-btn').style.backgroundColor = "#5a4634";
+            document.getElementById('play-spouse-voice-btn').innerText = "🔊 Escuchar Mensaje";
+            document.getElementById('play-spouse-voice-btn').style.backgroundColor = "#5a4634";
+
+            if (src && src !== '') { voicePlayer.src = src; btnVoice.style.display = "block"; } 
+            else { voicePlayer.src = ""; btnVoice.style.display = "none"; }
+        }
+
+        function toggleVoice(playerId, btnId) {
+            var voicePlayer = document.getElementById(playerId);
+            var bgMusic = document.getElementById("bg-music");
+            var btnVoice = document.getElementById(btnId);
+
+            if (voicePlayer.paused) {
+                voicePlayer.play(); bgMusic.volume = 0.2; 
+                btnVoice.innerText = "⏸️ Pausar Mensaje"; btnVoice.style.backgroundColor = "#8c6b4a";
+            } else {
+                voicePlayer.pause(); bgMusic.volume = 1.0; 
+                btnVoice.innerText = "🔊 Escuchar Mensaje"; btnVoice.style.backgroundColor = "#5a4634";
+            }
+        }
+
+        document.getElementById("voice-player").addEventListener("ended", function() {
+            document.getElementById("bg-music").volume = 1.0; 
+            document.getElementById('play-voice-btn').innerText = "🔊 Escuchar Mensaje"; document.getElementById('play-voice-btn').style.backgroundColor = "#5a4634";
+            document.getElementById('play-spouse-voice-btn').innerText = "🔊 Escuchar Mensaje"; document.getElementById('play-spouse-voice-btn').style.backgroundColor = "#5a4634";
+        });
+
+        function toggleChildren(btn) {
+            const childUl = btn.nextElementSibling; 
+            if (!childUl || childUl.tagName !== 'UL') return;
+            const viewport = document.getElementById("viewport");
+            const rectAntes = btn.getBoundingClientRect();
+            const isOpening = (childUl.style.display === 'none' || childUl.style.display === '');
+            
+            if (isOpening) { childUl.style.display = 'flex'; btn.innerText = '- Ocultar'; } 
+            else { childUl.style.display = 'none'; btn.innerText = '+ Descendientes'; }
+
+            const rectDespues = btn.getBoundingClientRect();
+            viewport.scrollBy(0, rectDespues.top - rectAntes.top);
+
+            if (isOpening) { setTimeout(() => { childUl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); }, 50); } 
+            else { setTimeout(() => { if (btn.previousElementSibling) btn.previousElementSibling.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); }, 50); }
+        }
+    </script>
+</body>
+</html>

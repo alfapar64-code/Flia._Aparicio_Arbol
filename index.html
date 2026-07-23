@@ -155,8 +155,18 @@
         .modal-details p { margin: 8px 0; font-size: 14px; color: #333;}
         
         .event-list { list-style-type: none; padding: 0; margin-top: 15px;}
-        .event-item { background: #fff; border: 1px solid #8c6b4a; border-radius: 8px; padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, background-color 0.2s;}
+        .event-item { 
+            background: #fff; border: 1px solid #8c6b4a; border-radius: 8px; 
+            padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            cursor: pointer; transition: transform 0.2s, background-color 0.2s;
+            display: flex; align-items: center; gap: 12px; 
+        }
         .event-item:hover { transform: translateY(-2px); background-color: #f0f8ff; }
+        .event-item-info { flex: 1; } 
+        .event-item img {
+            width: 50px; height: 50px; border-radius: 50%; object-fit: cover;
+            border: 2px solid #8c6b4a; flex-shrink: 0; background-color: #fdf5e6;
+        } 
         .event-item h4 { margin: 0 0 5px 0; color: #3a2b1c; font-size: 14px;}
         .event-item p { margin: 0; font-size: 12px; color: #555;}
         .event-birthday { border-left: 5px solid #28b463; }
@@ -687,13 +697,13 @@
                 if (persona.nacimiento && persona.nacimiento !== '-') {
                     const parts = persona.nacimiento.split('/');
                     if (parts.length === 3 && isDateInWeek(parseInt(parts[0]), parseInt(parts[1]) - 1)) {
-                        eventsFound.push({ type: 'birthday', name: persona.nombre, mainName: persona.nombre, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]) });
+                        eventsFound.push({ type: 'birthday', name: persona.nombre, mainName: persona.nombre, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]), img: persona.imagen });
                     }
                 }
                 if (persona.defuncion && persona.defuncion !== '-') {
                     const parts = persona.defuncion.split('/');
                     if (parts.length === 3 && isDateInWeek(parseInt(parts[0]), parseInt(parts[1]) - 1)) {
-                        eventsFound.push({ type: 'death', name: persona.nombre, mainName: persona.nombre, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]) });
+                        eventsFound.push({ type: 'death', name: persona.nombre, mainName: persona.nombre, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]), img: persona.imagen });
                     }
                 }
             });
@@ -704,13 +714,13 @@
                     if (conyuge.nacimiento && conyuge.nacimiento !== '-') {
                         const parts = conyuge.nacimiento.split('/');
                         if (parts.length === 3 && isDateInWeek(parseInt(parts[0]), parseInt(parts[1]) - 1)) {
-                            eventsFound.push({ type: 'birthday', name: conyuge.nombre + " (Cónyuge)", mainName: keyTitular, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]) });
+                            eventsFound.push({ type: 'birthday', name: conyuge.nombre + " (Cónyuge)", mainName: keyTitular, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]), img: conyuge.imagen });
                         }
                     }
                     if (conyuge.defuncion && conyuge.defuncion !== '-') {
                         const parts = conyuge.defuncion.split('/');
                         if (parts.length === 3 && isDateInWeek(parseInt(parts[0]), parseInt(parts[1]) - 1)) {
-                            eventsFound.push({ type: 'death', name: conyuge.nombre + " (Cónyuge)", mainName: keyTitular, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]) });
+                            eventsFound.push({ type: 'death', name: conyuge.nombre + " (Cónyuge)", mainName: keyTitular, day: parseInt(parts[0]), month: parseInt(parts[1]) - 1, year: parseInt(parts[2]), img: conyuge.imagen });
                         }
                     }
                 });
@@ -738,7 +748,17 @@
                         desc = `🕊️ <strong>${ev.day} de ${mesesNombres[ev.month]}</strong><br>Aniversario de defunción (${yearsAgo} años)`;
                     }
 
-                    li.innerHTML = `<h4>${ev.name}</h4><p>${desc}</p><div style="font-size:10px; color:#2e86c1; margin-top:6px; font-weight:bold;">📍 Tocar para ubicar en el árbol</div>`;
+                    // Asegurarnos de tener un respaldo si falta la foto
+                    let imgSrc = (ev.img && ev.img.trim() !== "") ? ev.img : "https://via.placeholder.com/50?text=Foto";
+
+                    li.innerHTML = `
+                        <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/50?text=Foto'" alt="Miniatura">
+                        <div class="event-item-info">
+                            <h4>${ev.name}</h4>
+                            <p>${desc}</p>
+                            <div style="font-size:10px; color:#2e86c1; margin-top:6px; font-weight:bold;">📍 Tocar para ubicar en el árbol</div>
+                        </div>
+                    `;
                     eventsList.appendChild(li);
                 });
             }
